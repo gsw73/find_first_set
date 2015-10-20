@@ -32,7 +32,7 @@ class TestCase #( parameter WIDTH = 128 );
         for ( int i = 0; i < num; i++ )
         begin
             assert( rr.randomize() );
-            vector |= 1 << rr;
+            vector |= 1 << rr.value;
         end
     endfunction
 
@@ -99,7 +99,7 @@ endclass
 class Monitor #( parameter WIDTH = 38 );
 
     mailbox mbxA2M;
-    mailbox mbxSB;
+    mailbox mbx2SB;
     uint32_t cnt_total;
     virtual ffs_if#(WIDTH).TB sig_h;
 
@@ -107,7 +107,7 @@ class Monitor #( parameter WIDTH = 38 );
         this.mbxA2M = agnt;
         this.sig_h = s;
 
-        mbxSB = new();
+        mbx2SB = new();
     endfunction
 
     task run();
@@ -117,10 +117,10 @@ class Monitor #( parameter WIDTH = 38 );
             begin
                 TestCase#( WIDTH ) dut_tc;
 
-                wait( sig_h.out_vld )
+                wait( sig_h.cb.out_vld )
                 dut_tc = new;
-                dut_tc.first_bit = sig_h.cb.first_bit;
-                mbxSB.put( dut_tc );
+                dut_tc.first_bit = sig_h.cb.location;
+                mbx2SB.put( dut_tc );
                 @( sig_h.cb );
             end
         join_none
@@ -129,9 +129,10 @@ class Monitor #( parameter WIDTH = 38 );
         begin
             TestCase#( WIDTH ) chk_dut_tc;
             TestCase#( WIDTH ) chk_agnt_tc;
+            pf_e chk;
 
-            mbxSB.get( chk_dut_tc );
-            mbxSb.get( chk_agnt_tc );
+            mbxA2M.get( chk_dut_tc );
+            mbx2SB.get( chk_agnt_tc );
 
             cnt_total++;
 
@@ -162,7 +163,7 @@ class MyEnv #( parameter WIDTH = 50 );
     mailbox mbxA2D;
     mailbox mbxA2M;
 
-    function new( virtual ffs_if#(DW).TB s );
+    function new( virtual ffs_if#(WIDTH).TB s );
         mbxA2D = new();
         mbxA2M = new();
 

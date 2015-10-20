@@ -54,7 +54,7 @@ u_ffs_if
 );
 
 // instantiate the main program
-main_prg #( .WIDTH( VEC_WIDTH ) ) u_main_prg( .i_f( ffs_if ) );
+main_prg #( .WIDTH( VEC_WIDTH ) ) u_main_prg( .i_f( u_ffs_if ) );
 
 initial
 begin
@@ -103,7 +103,7 @@ begin
     env = new( sig_h );
 
     sig_h.cb.rst_n  <= 1'b0;
-    #50 sig_h.cb_rst_n <= 1'b1;
+    #50 sig_h.cb.rst_n <= 1'b1;
 
     repeat( 20 ) @( sig_h.cb );
 

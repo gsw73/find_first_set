@@ -1,6 +1,6 @@
 module find_first_set
 #(
-    parameter WIDTH = 8;
+    parameter WIDTH = 8
 )
 (
     input logic clk,
