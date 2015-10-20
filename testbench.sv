@@ -16,10 +16,10 @@ interface ffs_if
 );
     logic rst_n;
     logic in_vld = 0;
-    logic vector = {WIDTH{1'b0}};
+    logic [ WIDTH - 1:0 ] vector = {WIDTH{1'b0}};
 
     logic out_vld;
-    logic [ 14:0 ] location;
+    logic [ 15:0 ] location;
 
     clocking cb @( posedge clk );
         default output #1;
@@ -39,7 +39,7 @@ endinterface : ffs_if
 
 module tb;
 
-parameter VEC_WIDTH = 256;
+parameter VEC_WIDTH = 64;
 
 logic clk;
 

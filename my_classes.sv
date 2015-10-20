@@ -22,6 +22,7 @@ class TestCase #( parameter WIDTH = 128 );
         first_bit inside { [ 0:WIDTH - 1 ] };
         num >= 0;
         num < first_bit;
+        num < ( WIDTH >> 3 );
         ( first_bit == 0 ) -> num == 0;
     }
 
@@ -29,7 +30,7 @@ class TestCase #( parameter WIDTH = 128 );
         RandcRange rr = new( first_bit );
 
         vector = 1 << first_bit;
-        for ( int i = 0; i < num; i++ )
+        for ( int i = 0; i < 4; i++ )
         begin
             assert( rr.randomize() );
             vector |= 1 << rr.value;
@@ -97,11 +98,14 @@ endclass
 // =======================================================================
 
 class Monitor #( parameter WIDTH = 38 );
+  
+    localparam VEC_PAD = ( WIDTH + 1 ) / 4;
 
     mailbox mbxA2M;
     mailbox mbx2SB;
     uint32_t cnt_total;
-    virtual ffs_if#(WIDTH).TB sig_h;
+    virtual ffs_if#(WIDTH).TB sig_h; 
+    string p_disp, p_disp1, p_disp2, p_disp3;
 
     function new( mailbox agnt, virtual ffs_if#(WIDTH).TB s );
         this.mbxA2M = agnt;
@@ -111,6 +115,10 @@ class Monitor #( parameter WIDTH = 38 );
     endfunction
 
     task run();
+        p_disp1 = "@%t first_bit = %0d, vector = %0";
+        p_disp2 = $psprintf( "%0dh", VEC_PAD );
+        p_disp3 = ", cnt = %0d";
+        p_disp = { p_disp1, p_disp2, p_disp3 };
 
         fork
             forever
@@ -131,19 +139,23 @@ class Monitor #( parameter WIDTH = 38 );
             TestCase#( WIDTH ) chk_agnt_tc;
             pf_e chk;
 
-            mbxA2M.get( chk_dut_tc );
-            mbx2SB.get( chk_agnt_tc );
+            mbxA2M.get( chk_agnt_tc );
+            mbx2SB.get( chk_dut_tc );
 
             cnt_total++;
 
             chk = pf_e'( chk_dut_tc.first_bit == chk_agnt_tc.first_bit );
 
-            $display( "@%t agnt.first_bit = %h, dut.first_bit = %h, cnt = %d", $realtime,
-                chk_agnt_tc.first_bit, chk_dut_tc.first_bit, cnt_total );
-
-            if ( chk == FAIL )
+            if ( chk == PASS )
             begin
-                $display( "@%t ERROR DETECTED; exiting", $realtime );
+                $display( p_disp,
+                    $realtime, chk_agnt_tc.first_bit, chk_agnt_tc.vector, cnt_total );
+            end
+
+            else
+            begin
+              $display( "@%t ERROR DETECTED: agnt.first_bit = %0d, dut.first_bit = %0d vector = %0VEC_PADh",
+                       $realtime, chk_agnt_tc.first_bit, chk_dut_tc.first_bit, chk_agnt_tc.vector );
                 repeat( 10 ) @( sig_h.cb );
                 $finish;
             end
