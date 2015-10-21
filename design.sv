@@ -22,6 +22,14 @@ module find_first_set
 // Register:  location
 //
 // Returns the MSB in a vector that has a bit set.
+//
+// Note that most synthesis tools support the "break" statement allowing
+// code as implemented.  To implement without a "break" statement, flip
+// the "for" loop around to start at lowest bit:
+//
+// for ( i = 0; i < WIDTH - 1; i++ )
+//     if ( vector[ i ] )
+//          location <= i;
 
 always @( posedge clk )
 
