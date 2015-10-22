@@ -6,7 +6,7 @@ module find_first_set
     input logic clk,
     input logic rst_n,
 
-    input in_vld,
+    input logic in_vld,
     input logic [ WIDTH - 1:0 ] vector,
 
     output logic out_vld,
