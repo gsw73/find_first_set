@@ -106,7 +106,6 @@ package ffs_pkg;
         mailbox mbx2SB;
         int cnt_total;
         virtual ffs_if#(WIDTH).TB sig_h;
-        string p_disp, p_disp1, p_disp2, p_disp3;
 
         function new(mailbox agnt, virtual ffs_if#(WIDTH).TB s);
             this.mbxA2M = agnt;
@@ -116,11 +115,6 @@ package ffs_pkg;
         endfunction
 
         task run();
-            p_disp1 = "@%t first_bit = %0d, vector = %0";
-            p_disp2 = $psprintf("%0dh", VEC_PAD);
-            p_disp3 = ", cnt = %0d";
-            p_disp = {p_disp1, p_disp2, p_disp3};
-
             fork
                 forever
                     begin
@@ -149,7 +143,7 @@ package ffs_pkg;
 
                     if (chk == PASS)
                         begin
-                            $display(p_disp,
+                            $display("@%t first_bit=%0d, vector=%h, cnt=%0d",
                                 $realtime, chk_agnt_tc.first_bit, chk_agnt_tc.vector, cnt_total);
                         end
 
